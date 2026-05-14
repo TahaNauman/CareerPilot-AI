@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerPilot AI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f13;
+    --bg2: #16161d;
+    --bg3: #1e1e28;
+    --border: #2a2a38;
+    --text: #e8e8f0;
+    --muted: #7a7a96;
+    --purple: #7c5cbf;
+    --purple-light: #a07de0;
+    --teal: #2dd4bf;
+    --amber: #f59e0b;
+    --green: #34d399;
+    --coral: #f87171;
+    --blue: #60a5fa;
+    --radius: 12px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  /* ── NAV ── */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, var(--purple-light), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-badge { font-size: 11px; background: var(--bg3); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; color: var(--muted); }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── ONBOARDING ── */
+  #screen-onboard { max-width: 640px; margin: 0 auto; padding: 48px 24px; }
+  .onboard-header { text-align: center; margin-bottom: 40px; }
+  .onboard-header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .onboard-header p { color: var(--muted); font-size: 16px; }
+  .step { display: none; }
+  .step.active { display: block; }
+  .step-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--purple-light); margin-bottom: 8px; }
+  .step h2 { font-size: 22px; font-weight: 600; margin-bottom: 24px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+  .chip { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; font-size: 14px; transition: all 0.15s; user-select: none; }
+  .chip:hover { border-color: var(--purple); }
+  .chip.selected { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  input[type="text"], input[type="number"] { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.15s; }
+  input[type="text"] { flex: 1; }
+  input[type="text"]:focus, input[type="number"]:focus { border-color: var(--purple); }
+  .step-nav { display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; }
+  .btn { padding: 10px 22px; border-radius: 8px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-primary:hover { background: var(--purple-light); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 40px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--teal)); border-radius: 2px; transition: width 0.3s; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .tag { padding: 4px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .tag-remove { cursor: pointer; color: var(--muted); font-size: 16px; line-height: 1; }
+  .tag-remove:hover { color: var(--coral); }
+
+  /* ── DASHBOARD ── */
+  #screen-dashboard { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .dash-grid { grid-template-columns: 1fr; } }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .card-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 16px; }
+  .career-item { padding: 14px; border-radius: 8px; background: var(--bg3); margin-bottom: 10px; cursor: pointer; border: 1px solid transparent; transition: border 0.15s; }
+  .career-item:hover { border-color: var(--purple); }
+  .career-item.selected { border-color: var(--purple); background: rgba(124,92,191,0.1); }
+  .career-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .confidence-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .confidence-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+  .confidence-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--purple), var(--teal)); }
+  .confidence-pct { font-size: 12px; color: var(--teal); font-weight: 600; min-width: 32px; }
+  .reasons { font-size: 13px; color: var(--muted); }
+  .reasons li { margin-left: 16px; margin-bottom: 2px; }
+  .skill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .skill-chip { font-size: 11px; padding: 3px 10px; border-radius: 12px; background: rgba(124,92,191,0.2); color: var(--purple-light); border: 1px solid rgba(124,92,191,0.3); }
+  .gap-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .gap-item:last-child { border-bottom: none; }
+  .gap-num { font-size: 11px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--bg3); border-radius: 50%; color: var(--muted); flex-shrink: 0; }
+  .gap-skill { font-size: 14px; font-weight: 500; flex: 1; }
+  .gap-reason { font-size: 12px; color: var(--muted); }
+  .semester-row { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; }
+  .semester-card { flex-shrink: 0; width: 200px; background: var(--bg3); border-radius: 8px; padding: 16px; border: 1px solid var(--border); }
+  .sem-num { font-size: 11px; color: var(--purple-light); font-weight: 600; margin-bottom: 4px; }
+  .sem-label { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .sem-section { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 4px; }
+  .sem-items li { font-size: 12px; color: var(--text); margin-left: 14px; margin-bottom: 2px; }
+  .sem-internship { margin-top: 10px; padding: 6px 10px; background: rgba(45,212,191,0.1); border-radius: 6px; font-size: 11px; color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
+  .academic-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .acad-major { font-size: 20px; font-weight: 700; color: var(--purple-light); margin-bottom: 4px; }
+  .acad-alt { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .acad-section { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
+  .acad-item { font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+  .acad-item:last-child { border-bottom: none; }
+  .course-item { padding: 10px; border-radius: 8px; background: var(--bg3); margin-bottom: 8px; border: 1px solid var(--border); }
+  .course-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .course-meta { font-size: 11px; color: var(--muted); }
+
+  /* ── CHAT ── */
+  .chat-fab { position: fixed; bottom: 28px; right: 28px; width: 52px; height: 52px; border-radius: 50%; background: var(--purple); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(124,92,191,0.4); transition: transform 0.15s; z-index: 200; }
+  .chat-fab:hover { transform: scale(1.08); }
+  .chat-fab svg { width: 22px; height: 22px; fill: #fff; }
+  .chat-panel { position: fixed; bottom: 92px; right: 28px; width: 360px; max-height: 500px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; z-index: 200; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: none; }
+  .chat-panel.open { display: flex; }
+  .chat-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+  .msg.user { background: var(--purple); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg.bot { background: var(--bg3); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg.bot.loading { color: var(--muted); }
+  .chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .chat-input-row input { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; }
+  .chat-input-row input:focus { border-color: var(--purple); }
+  .chat-send { background: var(--purple); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px; }
+
+  /* ── LOADING OVERLAY ── */
+  #loading { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  #loading.show { display: flex; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--purple-light); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-size: 14px; }
+  .loading-steps { display: flex; flex-direction: column; gap: 6px; }
+  .loading-step { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .loading-step.done { color: var(--green); }
+  .loading-step.active { color: var(--text); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  .full-width { grid-column: 1 / -1; }
+  .empty-state { text-align: center; color: var(--muted); padding: 32px; font-size: 14px; }
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 20px; flex: 1; min-width: 120px; }
+  .stat-val { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+  .section-header h2 { font-size: 18px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">✦ CareerPilot AI</div>
+  <div class="nav-badge" id="nav-badge">GPT-4o-mini</div>
+</nav>
+
+<!-- LOADING OVERLAY -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-steps" id="loading-steps">
+    <div class="loading-step active" id="ls-profile"><span class="dot"></span>Analyzing your profile…</div>
+    <div class="loading-step" id="ls-career"><span class="dot"></span>Predicting career paths…</div>
+    <div class="loading-step" id="ls-parallel"><span class="dot"></span>Academic plan + skill gaps…</div>
+    <div class="loading-step" id="ls-roadmap"><span class="dot"></span>Building your roadmap…</div>
+  </div>
+</div>
+
+<!-- SCREEN 1: ONBOARDING -->
+<div id="screen-onboard" class="screen active">
+  <div class="onboard-header">
+    <h1>Your AI Career Co-pilot</h1>
+    <p>Answer 4 quick questions — get a personalized career roadmap</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:25%"></div>
+  </div>
+
+  <!-- Step 1: Interests -->
+  <div class="step active" id="step-1">
+    <div class="step-label">Step 1 of 4</div>
+    <h2>What are your academic interests?</h2>
+    <div class="chips" id="interest-chips">
+      <div class="chip" onclick="toggleChip(this,'interest')">Biology</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Computer Science</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Mathematics</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Physics</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Chemistry</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Business</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Psychology</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Economics</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Design</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Medicine</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Engineering</div>
+      <div class="chip" onclick="toggleChip(this,'interest')">Arts</div>
+    </div>
+    <div class="input-row">
+      <input type="text" id="interest-input" placeholder="Add your own…" onkeydown="if(event.key==='Enter')addCustom('interest')">
+      <button class="btn btn-ghost" onclick="addCustom('interest')">Add</button>
+    </div>
+    <div class="tag-list" id="interest-tags"></div>
+    <div class="step-nav">
+      <button class="btn btn-primary" onclick="goStep(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Skills -->
+  <div class="step" id="step-2">
+    <div class="step-label">Step 2 of 4</div>
+    <h2>What skills do you already have?</h2>
+    <div class="chips" id="skill-chips">
+      <div class="chip" onclick="toggleChip(this,'skill')">Python</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">JavaScript</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Excel</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">R</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">SQL</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Research</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Statistics</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Communication</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Java</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Machine Learning</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Photoshop</div>
+      <div class="chip" onclick="toggleChip(this,'skill')">Leadership</div>
+    </div>
+    <div class="input-row">
+      <input type="text" id="skill-input" placeholder="Add your own…" onkeydown="if(event.key==='Enter')addCustom('skill')">
+      <button class="btn btn-ghost" onclick="addCustom('skill')">Add</button>
+    </div>
+    <div class="tag-list" id="skill-tags"></div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Goals -->
+  <div class="step" id="step-3">
+    <div class="step-label">Step 3 of 4</div>
+    <h2>What are your career goals?</h2>
+    <div class="chips" id="goal-chips">
+      <div class="chip" onclick="toggleChip(this,'goal')">Work at a big tech company</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">Start my own company</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">Do research / academia</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">Work in healthcare</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">High salary</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">Work remotely</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">Make social impact</div>
+      <div class="chip" onclick="toggleChip(this,'goal')">Go abroad</div>
+    </div>
+    <div class="input-row">
+      <input type="text" id="goal-input" placeholder="Add your own…" onkeydown="if(event.key==='Enter')addCustom('goal')">
+      <button class="btn btn-ghost" onclick="addCustom('goal')">Add</button>
+    </div>
+    <div class="tag-list" id="goal-tags"></div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Academic info -->
+  <div class="step" id="step-4">
+    <div class="step-label">Step 4 of 4</div>
+    <h2>A bit about your academics</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Current Year</div>
+        <div class="chips">
+          <div class="chip" onclick="selectYear(this,1)">Year 1</div>
+          <div class="chip" onclick="selectYear(this,2)">Year 2</div>
+          <div class="chip" onclick="selectYear(this,3)">Year 3</div>
+          <div class="chip" onclick="selectYear(this,4)">Year 4</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">GPA (optional)</div>
+        <input type="number" id="gpa-input" min="0" max="4" step="0.1" placeholder="e.g. 3.5" style="width:100%">
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Location</div>
+    <input type="text" id="location-input" value="Pakistan" style="width:100%;margin-bottom:24px;">
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitOnboarding()">Generate My Roadmap ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: DASHBOARD -->
+<div id="screen-dashboard" class="screen">
+  <div class="section-header">
+    <h2 id="dash-greeting">Your Career Intelligence Dashboard</h2>
+    <button class="btn btn-ghost" onclick="resetApp()">Start over</button>
+  </div>
+
+  <div class="stat-row" id="stat-row">
+    <div class="stat"><div class="stat-val" id="stat-careers">—</div><div class="stat-label">Career Matches</div></div>
+    <div class="stat"><div class="stat-val" id="stat-top-conf">—</div><div class="stat-label">Top Match Confidence</div></div>
+    <div class="stat"><div class="stat-val" id="stat-gaps">—</div><div class="stat-label">Skills to Learn</div></div>
+    <div class="stat"><div class="stat-val" id="stat-semesters">—</div><div class="stat-label">Semesters Planned</div></div>
+  </div>
+
+  <div class="dash-grid">
+    <!-- Careers -->
+    <div class="card">
+      <div class="card-title">Career Matches</div>
+      <div id="careers-list"><div class="empty-state">Loading…</div></div>
+    </div>
+
+    <!-- Skill Gap -->
+    <div class="card">
+      <div class="card-title">Skill Gaps → Priority Order</div>
+      <div id="skillgap-list"><div class="empty-state">Loading…</div></div>
+    </div>
+
+    <!-- Academic -->
+    <div class="card">
+      <div class="card-title">Academic Plan</div>
+      <div id="academic-content"><div class="empty-state">Loading…</div></div>
+    </div>
+
+    <!-- Online Courses -->
+    <div class="card">
+      <div class="card-title">Recommended Online Courses</div>
+      <div id="courses-list"><div class="empty-state">Loading…</div></div>
+    </div>
+
+    <!-- Roadmap -->
+    <div class="card full-width">
+      <div class="card-title">Semester Roadmap</div>
+      <div class="semester-row" id="roadmap-row"><div class="empty-state">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT FAB -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()" style="display:none">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+</button>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <span>Ask CareerPilot</span>
+    <span onclick="toggleChat()" style="cursor:pointer;color:var(--muted)">✕</span>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="msg bot">Hi! Ask me anything about your career plan, skill gaps, or roadmap. 🚀</div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chat-input" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+  const API = '';  // same origin
+  let state = { userId: null, sessionId: null, interests: [], skills: [], goals: [], year: null };
+
+  // ── ONBOARDING ──
+  function toggleChip(el, type) {
+    el.classList.toggle('selected');
+    const val = el.textContent.trim();
+    const arr = state[type + 's'] || (state[type === 'interest' ? 'interests' : type === 'skill' ? 'skills' : 'goals']);
+    const key = type === 'interest' ? 'interests' : type === 'skill' ? 'skills' : 'goals';
+    if (el.classList.contains('selected')) {
+      if (!state[key].includes(val)) state[key].push(val);
+    } else {
+      state[key] = state[key].filter(v => v !== val);
+    }
+    renderTags(key);
+  }
+
+  function addCustom(type) {
+    const key = type === 'interest' ? 'interests' : type === 'skill' ? 'skills' : 'goals';
+    const input = document.getElementById(type + '-input');
+    const val = input.value.trim();
+    if (!val || state[key].includes(val)) return;
+    state[key].push(val);
+    input.value = '';
+    renderTags(key);
+  }
+
+  function renderTags(key) {
+    const el = document.getElementById(key.slice(0,-1) + '-tags');
+    if (!el) return;
+    el.innerHTML = state[key].map(v =>
+      `<div class="tag">${v}<span class="tag-remove" onclick="removeTag('${key}','${v}')">×</span></div>`
+    ).join('');
+  }
+
+  function removeTag(key, val) {
+    state[key] = state[key].filter(v => v !== val);
+    renderTags(key);
+  }
+
+  function selectYear(el, y) {
+    document.querySelectorAll('#step-4 .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.year = y;
+  }
+
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('progress-fill').style.width = (n * 25) + '%';
+  }
+
+  async function submitOnboarding() {
+    if (state.interests.length === 0) { alert('Please select at least one interest.'); return; }
+    if (state.skills.length === 0) { alert('Please select at least one skill.'); return; }
+    if (state.goals.length === 0) { alert('Please select at least one goal.'); return; }
+    if (!state.year) { alert('Please select your academic year.'); return; }
+
+    const gpa = parseFloat(document.getElementById('gpa-input').value) || null;
+    const location = document.getElementById('location-input').value || 'Pakistan';
+
+    showLoading();
+
+    try {
+      // Onboard
+      const res = await fetch('/api/onboard', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          interests: state.interests,
+          skills: state.skills,
+          goals: state.goals,
+          academic_year: state.year,
+          gpa, location
+        })
+      });
+      const data = await res.json();
+      state.userId = data.user_id;
+      state.sessionId = crypto.randomUUID();
+
+      updateLoadingStep(1);
+
+      // Run pipeline
+      const chatRes = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          user_id: state.userId,
+          session_id: state.sessionId,
+          message: `I'm a year ${state.year} student interested in ${state.interests.join(', ')}. My skills include ${state.skills.join(', ')}. My goals: ${state.goals.join(', ')}. What career should I pursue?`
+        })
+      });
+      const result = await chatRes.json();
+      updateLoadingStep(4);
+
+      hideLoading();
+      renderDashboard(result);
+    } catch (err) {
+      hideLoading();
+      alert('Error: ' + err.message + '\n\nMake sure the backend is running and OPENAI_API_KEY is set.');
+    }
+  }
+
+  // ── LOADING ──
+  function showLoading() {
+    document.getElementById('loading').classList.add('show');
+  }
+
+  function hideLoading() {
+    document.getElementById('loading').classList.remove('show');
+    [1,2,3,4].forEach(i => {
+      const el = document.getElementById('ls-' + ['profile','career','parallel','roadmap'][i-1]);
+      if (el) { el.classList.remove('active'); el.classList.add('done'); }
+    });
+  }
+
+  let loadingTimer;
+  function updateLoadingStep(n) {
+    const steps = ['profile','career','parallel','roadmap'];
+    steps.forEach((s, i) => {
+      const el = document.getElementById('ls-' + s);
+      if (i < n) { el.classList.remove('active'); el.classList.add('done'); }
+      else if (i === n) { el.classList.add('active'); }
+    });
+  }
+
+  // Animate loading steps over time
+  function startLoadingAnimation() {
+    let step = 0;
+    const steps = ['profile','career','parallel','roadmap'];
+    loadingTimer = setInterval(() => {
+      if (step < steps.length) {
+        steps.forEach((s, i) => {
+          const el = document.getElementById('ls-' + s);
+          el.classList.remove('active', 'done');
+          if (i < step) el.classList.add('done');
+          else if (i === step) el.classList.add('active');
+        });
+        step++;
+      }
+    }, 1800);
+  }
+
+  // ── DASHBOARD RENDER ──
+  function renderDashboard(result) {
+    showScreen('dashboard');
+    document.getElementById('chat-fab').style.display = 'flex';
+
+    const { careers, skill_gap, academic, roadmap } = result;
+
+    // Stats
+    document.getElementById('stat-careers').textContent = careers ? careers.length : '—';
+    document.getElementById('stat-top-conf').textContent = careers ? Math.round(careers[0].confidence * 100) + '%' : '—';
+    document.getElementById('stat-gaps').textContent = skill_gap ? skill_gap.missing_skills.length : '—';
+    document.getElementById('stat-semesters').textContent = roadmap ? roadmap.total_semesters : '—';
+
+    // Greeting
+    if (careers) document.getElementById('dash-greeting').textContent = `Your top match: ${careers[0].name}`;
+
+    // Careers
+    if (careers) {
+      document.getElementById('careers-list').innerHTML = careers.map((c, i) => `
+        <div class="career-item ${i===0?'selected':''}">
+          <div class="career-name">${c.name}</div>
+          <div class="confidence-row">
+            <div class="confidence-bar"><div class="confidence-fill" style="width:${c.confidence*100}%"></div></div>
+            <div class="confidence-pct">${Math.round(c.confidence*100)}%</div>
+          </div>
+          <ul class="reasons">${c.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+          <div class="skill-chips">${c.required_skills.slice(0,5).map(s => `<span class="skill-chip">${s}</span>`).join('')}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px;">${c.salary_range_usd}</div>
+        </div>
+      `).join('');
+    }
+
+    // Skill Gap
+    if (skill_gap) {
+      if (skill_gap.missing_skills.length === 0) {
+        document.getElementById('skillgap-list').innerHTML = '<div style="color:var(--green);font-size:14px;padding:16px 0;">✓ You have all the required skills for your target career!</div>';
+      } else {
+        document.getElementById('skillgap-list').innerHTML = skill_gap.priority_order.map((s, i) => `
+          <div class="gap-item">
+            <div class="gap-num">${i+1}</div>
+            <div>
+              <div class="gap-skill">${s}</div>
+              <div class="gap-reason">${skill_gap.priority_rationale[s] || ''}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Academic
+    if (academic) {
+      document.getElementById('academic-content').innerHTML = `
+        <div class="acad-major">${academic.recommended_major}</div>
+        <div class="acad-alt">Alt: ${academic.alternative_majors.join(' · ')}</div>
+        <div class="acad-section">Core Electives</div>
+        ${academic.core_electives.map(e => `<div class="acad-item">${e}</div>`).join('')}
+      `;
+
+      document.getElementById('courses-list').innerHTML = academic.online_courses.map(c => `
+        <div class="course-item">
+          <div class="course-title">${c.title}</div>
+          <div class="course-meta">${c.platform} · ${c.duration_weeks} weeks</div>
+        </div>
+      `).join('');
+    }
+
+    // Roadmap
+    if (roadmap) {
+      document.getElementById('roadmap-row').innerHTML = roadmap.roadmap.map(s => `
+        <div class="semester-card">
+          <div class="sem-num">Semester ${s.semester}</div>
+          <div class="sem-label">${s.label}</div>
+          <div class="sem-section">Courses</div>
+          <ul class="sem-items">${s.courses.slice(0,3).map(c => `<li>${c}</li>`).join('')}</ul>
+          <div class="sem-section" style="margin-top:8px;">Skills</div>
+          <ul class="sem-items">${s.skills_to_acquire.slice(0,2).map(sk => `<li>${sk}</li>`).join('')}</ul>
+          ${s.internship_target ? `<div class="sem-internship">🎯 ${s.internship_target}</div>` : ''}
+        </div>
+      `).join('');
+    }
+  }
+
+  // ── CHAT ──
+  function toggleChat() {
+    document.getElementById('chat-panel').classList.toggle('open');
+  }
+
+  async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    appendMsg('user', msg);
+    input.value = '';
+
+    const loading = appendMsg('bot', 'Thinking…', true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          user_id: state.userId,
+          session_id: state.sessionId,
+          message: msg
+        })
+      });
+      const data = await res.json();
+      loading.remove();
+
+      if (data.type === 'full_analysis') {
+        appendMsg('bot', data.message);
+        renderDashboard(data);
+      } else {
+        appendMsg('bot', data.message);
+      }
+    } catch (err) {
+      loading.remove();
+      appendMsg('bot', 'Error connecting to server. Is the backend running?');
+    }
+  }
+
+  function appendMsg(role, text, isLoading = false) {
+    const el = document.createElement('div');
+    el.className = `msg ${role}${isLoading ? ' loading' : ''}`;
+    el.textContent = text;
+    const msgs = document.getElementById('chat-messages');
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    return el;
+  }
+
+  // ── UTILS ──
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+  }
+
+  function resetApp() {
+    state = { userId: null, sessionId: null, interests: [], skills: [], goals: [], year: null };
+    document.getElementById('chat-fab').style.display = 'none';
+    document.getElementById('chat-panel').classList.remove('open');
+    showScreen('onboard');
+    goStep(1);
+  }
+
+  // Start loading animation when submitting
+  const origSubmit = window.submitOnboarding;
+  window.submitOnboarding = async function() {
+    startLoadingAnimation();
+    await submitOnboarding.call(this);
+    clearInterval(loadingTimer);
+  };
+  // Re-bind correctly
+  document.getElementById('submit-btn').onclick = async () => {
+    startLoadingAnimation();
+    await submitOnboarding();
+    clearInterval(loadingTimer);
+  };
+</script>
+</body>
+</html>
