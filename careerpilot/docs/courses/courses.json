@@ -1,0 +1,13 @@
+[
+  {
+    "id": "coursera-ml-ng",
+    "title": "Machine Learning Specialization",
+    "platform": "Coursera",
+    "provider": "DeepLearning.AI",
+    "description": "Covers supervised learning, unsupervised learning, best practices...",
+    "skills": ["Python", "Machine Learning", "Neural Networks", "scikit-learn"],
+    "level": "beginner",
+    "duration": "3 months",
+    "url": "https://coursera.org/specializations/machine-learning-introduction"
+  }
+]

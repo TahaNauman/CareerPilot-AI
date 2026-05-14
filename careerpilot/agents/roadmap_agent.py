@@ -5,9 +5,11 @@ This is the most complex agent — uses gpt-4o-mini with detailed prompt.
 """
 import json
 from .llm import call_llm
-from models.schemas import RoadmapOutput, CareerOutput, AcademicOutput, SkillGapOutput
+from models.schema import RoadmapOutput, CareerOutput, AcademicOutput, SkillGapOutput
 
-SYSTEM_PROMPT = """You are a semester-by-semester academic roadmap planner.
+SYSTEM_PROMPT = f"""
+{rag_context if rag_context else ''}
+You are a semester-by-semester academic roadmap planner.
 
 Given a student's profile, career target, academic plan, and skill gaps,
 create a realistic semester action plan from their current year to graduation.

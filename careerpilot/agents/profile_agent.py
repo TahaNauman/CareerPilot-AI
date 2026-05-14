@@ -5,9 +5,11 @@ Uses gpt-4o-mini (cheap — pure extraction, no reasoning).
 """
 import json
 from .llm import call_llm
-from models.schemas import ProfileOutput
+from models.schema import ProfileOutput
 
-SYSTEM_PROMPT = """You are a student profile extraction agent.
+SYSTEM_PROMPT = f"""
+{rag_context if rag_context else ''} 
+You are a student profile extraction agent.
 
 Your job: extract structured information from a student's message and merge it 
 with their existing profile.

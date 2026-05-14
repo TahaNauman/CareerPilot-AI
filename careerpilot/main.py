@@ -6,6 +6,9 @@ from pydantic import BaseModel
 from typing import Optional
 import uuid
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from agents.orchestrator import run_pipeline
 from memory.store import MemoryStore

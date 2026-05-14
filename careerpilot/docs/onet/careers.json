@@ -1,0 +1,15 @@
+[
+  {
+    "soc_code": "15-1252.00",
+    "title": "Software Developer",
+    "description": "Develop, create, and modify general computer applications...",
+    "tasks": [
+      "Modify existing software to correct errors",
+      "Analyze user needs and software requirements"
+    ],
+    "skills": ["Programming", "Critical Thinking", "Systems Analysis"],
+    "median_salary": 120730,
+    "outlook": "25% growth (much faster than average)",
+    "education": "Bachelor's degree"
+  }
+]

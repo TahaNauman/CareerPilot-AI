@@ -5,9 +5,12 @@ Uses gpt-4o-mini with strong system prompt for reliable JSON.
 """
 import json
 from .llm import call_llm
-from models.schemas import CareerOutput
+from models.schema import CareerOutput
 
-SYSTEM_PROMPT = """You are a career intelligence agent specializing in student 
+SYSTEM_PROMPT = f"""
+{rag_context if rag_context else ''}
+
+You are a career intelligence agent specializing in student 
 career path prediction.
 
 Given a student profile, return the 3 best-fit career paths ranked by confidence.

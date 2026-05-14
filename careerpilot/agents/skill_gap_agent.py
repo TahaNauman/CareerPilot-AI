@@ -5,9 +5,12 @@ Simple set-diff + prioritization — uses gpt-4o-mini.
 """
 import json
 from .llm import call_llm
-from models.schemas import SkillGapOutput, CareerOutput
+from models.schema import SkillGapOutput, CareerOutput
 
-SYSTEM_PROMPT = """You are a skill gap analysis agent.
+SYSTEM_PROMPT = f"""
+{rag_context if rag_context else ''}
+
+You are a skill gap analysis agent.
 
 Given a student's current skills and their target career's required skills,
 identify what is missing and create a prioritized learning plan.

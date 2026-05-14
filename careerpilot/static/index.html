@@ -641,18 +641,18 @@
   }
 
   // Start loading animation when submitting
-  const origSubmit = window.submitOnboarding;
-  window.submitOnboarding = async function() {
-    startLoadingAnimation();
-    await submitOnboarding.call(this);
-    clearInterval(loadingTimer);
-  };
+  // const origSubmit = window.submitOnboarding;
+  // window.submitOnboarding = async function() {
+  //   startLoadingAnimation();
+  //   await submitOnboarding.call(this);
+  //   clearInterval(loadingTimer);
+  // };
   // Re-bind correctly
-  document.getElementById('submit-btn').onclick = async () => {
-    startLoadingAnimation();
-    await submitOnboarding();
-    clearInterval(loadingTimer);
-  };
+  // document.getElementById('submit-btn').onclick = async () => {
+  //   startLoadingAnimation();
+  //   await submitOnboarding();
+  //   clearInterval(loadingTimer);
+  // };
 </script>
 </body>
 </html>

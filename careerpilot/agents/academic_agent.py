@@ -5,9 +5,11 @@ Uses gpt-4o-mini.
 """
 import json
 from .llm import call_llm
-from models.schemas import AcademicOutput, CareerOutput
+from models.schema import AcademicOutput, CareerOutput
 
-SYSTEM_PROMPT = """You are an academic planning agent for university students.
+SYSTEM_PROMPT = f"""
+{rag_context if rag_context else ''}
+You are an academic planning agent for university students.
 
 Given a student's profile and their target career, recommend:
 - The best-fit university major

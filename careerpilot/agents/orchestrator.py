@@ -9,6 +9,12 @@ from typing import Optional
 from .llm import call_llm_text
 from . import profile_agent, career_agent, academic_agent, skill_gap_agent, roadmap_agent
 from memory.store import MemoryStore
+from agents.rag_agent import get_career_context, get_course_context, get_user_doc_context
+
+careers = career_agent.run(profile, rag_context=career_ctx + "\n" + user_ctx)
+
+# After skill gaps are identified:
+
 
 INTENT_PROMPT = """You are a routing agent for a career guidance system.
 
@@ -78,6 +84,9 @@ async def run_pipeline(
     store.save_profile(user_id, profile)
     print(f"[Orchestrator] Profile updated: {list(profile.keys())}")
 
+    career_ctx = get_career_context(profile)
+    user_ctx   = get_user_doc_context(profile.get("user_id",""), _profile_to_query(profile))
+
     # Step 3: Career Agent
     print("[Orchestrator] Running Career Agent...")
     career_out = await career_agent.run(profile)
@@ -91,6 +100,9 @@ async def run_pipeline(
     )
     print(f"[Orchestrator] Missing skills: {skillgap_out.missing_skills[:3]}...")
 
+    course_ctx = get_course_context(skill_gaps.missing_skills)
+    academics  = academic_agent.run(profile, skill_gaps, rag_context=course_ctx)
+    
     # Step 5: Roadmap Agent
     print("[Orchestrator] Running Roadmap Agent...")
     roadmap_out = await roadmap_agent.run(profile, career_out, academic_out, skillgap_out)
